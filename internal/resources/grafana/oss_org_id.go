@@ -38,6 +38,10 @@ func SplitOrgResourceID(id string) (int64, string) {
 	return 0, id
 }
 
+func ParseOrgID(d *schema.ResourceData) (int64, error) {
+	return strconv.ParseInt(d.Get("org_id").(string), 10, 64)
+}
+
 // ClientFromExistingOrgResource creates a client from the ID of an org-scoped resource
 // Those IDs are in the <orgID>:<resourceID> format
 func ClientFromExistingOrgResource(meta interface{}, id string) (*gapi.Client, int64, string) {
@@ -54,7 +58,7 @@ func ClientFromExistingOrgResource(meta interface{}, id string) (*gapi.Client, i
 // ClientFromNewOrgResource creates a client from the `org_id` attribute of a resource
 // This client is meant to be used in `Create` functions when the ID hasn't already been baked into the resource ID
 func ClientFromNewOrgResource(meta interface{}, d *schema.ResourceData) (*gapi.Client, int64) {
-	orgID, _ := strconv.ParseInt(d.Get("org_id").(string), 10, 64)
+	orgID, _ := ParseOrgID(d)
 	client := meta.(*common.Client).GrafanaAPI
 	if orgID == 0 {
 		orgID = meta.(*common.Client).GrafanaAPIConfig.OrgID // It's configured globally. TODO: Remove this once we drop support for the global org_id
